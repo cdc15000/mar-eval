@@ -1,4 +1,5 @@
 # mar-eval
+![CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)
 
 `mar-eval` is an open Python toolkit for evaluating Metal Artifact Reduction (MAR)
 performance in computed tomography (CT) imaging.
