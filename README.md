@@ -54,6 +54,14 @@ For a complete demonstration, see the example script:
 
 ---
 
+### Example Notebooks
+See the `examples/` directory for ready-to-run Jupyter notebooks demonstrating:
+- **CHO and AUC computation** (`1_intro_to_mar_eval.ipynb`)
+- **Full CHO workflow** (`2_cho_auc_analysis.ipynb`)
+- **Bias and statistical comparison (ΔAUC)** (`3_bias_and_statistical_comparison.ipynb`)
+
+---
+
 ## Features
 
 | Category | Description |
