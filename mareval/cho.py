@@ -1,5 +1,37 @@
 import numpy as np
-from scipy.stats import norm
+from sklearn.utils.extmath import safe_sparse_dot
+
+def cho_decision_values(images, template, channels):
+    """
+    Compute Channelized Hotelling Observer (CHO) decision values for a set of images.
+
+    Parameters
+    ----------
+    images : np.ndarray
+        Array of shape (N, H, W) or (N, P) containing image data.
+    template : np.ndarray
+        CHO template (channel weights or matched filter), shape (num_channels,) or (P,).
+    channels : np.ndarray
+        Channel matrix, shape (num_channels, P). Transforms images into channel space.
+
+    Returns
+    -------
+    decision_values : np.ndarray
+        Array of length N containing CHO decision values for each image.
+    """
+    # Flatten image stack if 2D
+    if images.ndim == 3:
+        N, H, W = images.shape
+        images = images.reshape(N, H * W)
+
+    # Project images into channel space
+    channel_outputs = images @ channels.T  # shape (N, num_channels)
+
+    # Compute decision statistic for each image
+    decision_values = safe_sparse_dot(channel_outputs, template)
+
+    return np.array(decision_values)
+
 
 class CHOModel:
     """

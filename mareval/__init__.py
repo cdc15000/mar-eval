@@ -1,11 +1,11 @@
 """
-mar-eval: Metal Artifact Reduction Evaluation Toolkit
-Implements quantitative analysis routines consistent with Annex GG
-of IEC 60601-2-44 Ed. 4 for task-based MAR performance evaluation.
+mar-eval: Annex GG toolkit for MAR performance evaluation
+Implements CHO analysis, AUC computation, and bias assessment utilities.
 """
 
-from .cho import CHOModel, compute_auc
-from .stats import delta_auc_test, bias_assessment
-from .utils import phi
+from .cho import cho_decision_values
+from .stats import compute_auc
+from . import utils
 
-__all__ = ["CHOModel", "compute_auc", "delta_auc_test", "bias_assessment", "phi"]
+__all__ = ["cho_decision_values", "compute_auc", "utils"]
+__version__ = "0.1.0"
