@@ -1,21 +1,47 @@
-# mar-eval
+# mar-eval 🩻  
+**Objective Evaluation Toolkit for Metal Artifact Reduction (MAR) Algorithms in CT Imaging**
 
-![CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)
+[![mar-eval CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions)
 
-**mar-eval** is a Python toolkit for evaluating Metal Artifact Reduction (MAR) performance in computed tomography (CT) imaging.
-It implements key components described in *Annex GG* of IEC 60601-2-44 (Ed. 4 draft), including Channelized Hotelling Observer (CHO) analysis, AUC computation, statistical comparison, and bias assessment.
+`mar-eval` is an open-source Python toolkit that implements the analysis framework described in **Annex GG** of the proposed IEC 60601-2-44 Ed. 4.  
+It enables objective evaluation of **Metal Artifact Reduction (MAR)** algorithms in CT imaging using the **Channelized Hotelling Observer (CHO)**, **AUC-based detectability metrics**, and **bias assessment** between MAR and non-MAR reconstructions.
 
 ---
 
-## 🚀 Installation
+## 🔍 Purpose
 
-You can install the latest release from PyPI (or Test PyPI for experimental builds):
+`mar-eval` supports regulatory, clinical, and technical validation of MAR performance by providing reproducible, quantitative methods for:
+- Computing **Area Under the ROC Curve (AUC)** using CHO-derived decision variables  
+- Performing **paired statistical comparison** of MAR vs. non-MAR detectability  
+- Estimating **confidence intervals** and **ΔAUC bias**  
+- Enabling interoperability across CT simulators, physical phantoms, and regulatory test environments
+
+---
+
+## 📘 Example Notebook
+
+A runnable Jupyter Notebook, [`examples/mar_eval_demo.ipynb`](examples/mar_eval_demo.ipynb), walks through the full workflow described in **Annex GG**:
+
+1. **GG.2 – Model Observer Task**  
+   Simulates lesion-present and lesion-absent image sets using Gaussian statistics.  
+2. **GG.3 – Data Evaluation**  
+   Computes CHO decision values, ROC curves, and AUC estimates.  
+3. **GG.4 – Statistical Comparison**  
+   Uses a one-tailed paired t-test to detect significant improvements in detectability.  
+4. **GG.5 – Bias Assessment**  
+   Quantifies ΔAUC and confidence intervals to evaluate MAR-related bias.
+
+---
+
+## ⚙️ Installation
+
+Install directly from [PyPI](https://pypi.org/project/mar-eval/):
 
 ```bash
 pip install mar-eval
 ```
 
-To install the latest development version from GitHub:
+Or, for the latest development version:
 
 ```bash
 pip install git+https://github.com/cdc15000/mar-eval.git
@@ -23,58 +49,73 @@ pip install git+https://github.com/cdc15000/mar-eval.git
 
 ---
 
-## 🧠 Overview
-
-**mar-eval** provides utilities to support both digital and quantitative physical approaches to MAR evaluation as described in IEC 60601-2-44 Annex GG.
-
-Core modules include:
-- `mareval.cho` — Channelized Hotelling Observer analysis and model observer simulation.
-- `mareval.stats` — AUC computation, ΔAUC bias, and statistical comparison.
-- `mareval.utils` — Helper functions for image simulation, ROI extraction, and data organization.
-
----
-
-## 📘 Examples
-
-The `examples/` directory includes ready-to-run Jupyter notebooks demonstrating how to use **mar-eval** for Metal Artifact Reduction (MAR) performance analysis in accordance with *Annex GG* of IEC 60601-2-44 (Ed. 4 draft).  
-
-Each notebook generates synthetic data and performs **CHO analysis**, **AUC computation**, and **ΔAUC bias assessment** using `scikit-learn` ROC utilities.
-
-| Notebook | Description |
-|-----------|--------------|
-| [1_intro_to_mar_eval.ipynb](examples/1_intro_to_mar_eval.ipynb) | Quick start example — simulate images, compute AUC, visualize ROC curves |
-| [2_cho_auc_analysis.ipynb](examples/2_cho_auc_analysis.ipynb) | Detailed workflow — perform CHO analysis, derive AUC distributions, and assess detectability |
-| [3_bias_and_statistical_comparison.ipynb](examples/3_bias_and_statistical_comparison.ipynb) | Statistical comparison — compute ΔAUC bias and perform one-tailed significance testing |
-
-To run them locally:
+## 🧪 Running the Example
 
 ```bash
-pip install jupyterlab mar-eval
+# Clone the repository
+git clone https://github.com/cdc15000/mar-eval.git
+cd mar-eval
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch JupyterLab
 jupyter lab
+
+# Open and run the example notebook
+examples/mar_eval_demo.ipynb
 ```
-
-Then open any notebook from the `examples/` folder.
-
-> 💡 You can view the notebooks online in GitHub’s built-in Jupyter viewer.
 
 ---
 
-## 🧩 Versioning and Releases
+## 📊 Output Example
 
-Version tags correspond to formal document references (e.g., *Annex GG v0.1.0*).
-Each release is listed in the [CHANGELOG.md](CHANGELOG.md).
+The notebook produces AUC estimates and statistical comparison similar to:
+
+```
+AUC (no MAR): 0.484  CI: (0.423, 0.538)
+AUC (with MAR): 0.504  CI: (0.445, 0.558)
+ΔAUC = 0.020, p = 0.0005
+```
+
+---
+
+## 🧩 Package Structure
+
+```
+mareval/
+├── __init__.py
+├── cho.py           # CHO computation routines
+├── stats.py         # AUC, bias, and statistical testing
+├── utils.py         # Helper utilities
+examples/
+└── mar_eval_demo.ipynb
+tests/
+└── test_mareval_basic.py
+```
 
 ---
 
 ## 🧾 Citation
 
-If you use **mar-eval** in your research or regulatory documentation, please cite:
+If you use `mar-eval` in your research, please cite:
 
-> Cocchiaraley, C.D. (2025). *mar-eval: Annex GG Toolkit for MAR Performance Evaluation.*  
-> GitHub Repository: https://github.com/cdc15000/mar-eval
+> C.D. Cocchiaraley, *Annex GG — Objective evaluation of Metal Artifact Reduction algorithms in CT imaging*,  
+> Proposed addition to IEC 60601-2-44 Ed. 4 (2025).
 
 ---
 
-## 📄 License
+## 🪪 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+## 🤝 Contributing
+
+Contributions, issue reports, and pull requests are welcome.  
+Please open an [issue](https://github.com/cdc15000/mar-eval/issues) or submit a PR with your proposed improvements.
+
+---
+
+© 2025 Christopher D. Cocchiaraley. All rights reserved.
