@@ -1,46 +1,37 @@
 import numpy as np
 from sklearn.metrics import roc_auc_score
-from scipy import stats
+import warnings
 
 def compute_auc(decision_values, labels, n_bootstrap: int = 2000, random_state: int = 42):
     """
     Compute the Area Under the ROC Curve (AUC) with 95% confidence interval.
-
-    Parameters
-    ----------
-    decision_values : np.ndarray
-        Array of decision values (CHO test statistics).
-    labels : np.ndarray
-        Binary array of ground truth labels (0 = lesion-absent, 1 = lesion-present).
-    n_bootstrap : int, optional
-        Number of bootstrap iterations for CI estimation.
-    random_state : int, optional
-        Random-number seed for reproducibility.
-
-    Returns
-    -------
-    results : dict
-        {
-          "auc": float,
-          "ci": (float, float),
-          "n_bootstrap": int
-        }
     """
+    decision_values = np.asarray(decision_values)
+    labels = np.asarray(labels)
+
     rng = np.random.default_rng(random_state)
     auc = roc_auc_score(labels, decision_values)
 
-    # Bootstrap CI
     boot = []
     n = len(labels)
     for _ in range(n_bootstrap):
         idx = rng.integers(0, n, n)
-        try:
-            boot_auc = roc_auc_score(labels[idx], decision_values[idx])
-            boot.append(boot_auc)
-        except ValueError:
-            continue  # skip if resample has only one class
-    ci = (np.percentile(boot, 2.5), np.percentile(boot, 97.5)) if boot else (np.nan, np.nan)
+        sample_labels = labels[idx]
+        sample_values = decision_values[idx]
 
+        # Skip resamples that contain only one class
+        if len(np.unique(sample_labels)) < 2:
+            continue
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            try:
+                boot_auc = roc_auc_score(sample_labels, sample_values)
+                boot.append(boot_auc)
+            except ValueError:
+                continue
+
+    ci = (np.percentile(boot, 2.5), np.percentile(boot, 97.5)) if boot else (auc, auc)
     return {"auc": auc, "ci": ci, "n_bootstrap": len(boot)}
 
 
