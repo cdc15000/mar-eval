@@ -2,51 +2,48 @@
 
 All notable changes to **mar-eval** will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)  
+and the project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [0.1.1] – 2025-10-23
+
 ### Added
-- Planned integration of additional model observer options (NPWE, IO, etc.)
-- Expanded dataset utilities for CT simulator interoperability
-
----
-
-## [0.2.0] – 2025-10-23
-### Added
-- Example Jupyter notebooks demonstrating CHO workflow and AUC computation
-- ΔAUC bias evaluation demo comparing MAR vs. non-MAR images
-- CI test matrix for Python 3.9–3.12 on GitHub Actions
-- Full README with usage examples and project badges
-
-### Changed
-- Updated `pyproject.toml` and `__init__.py` for version 0.2.0
-- Improved test coverage and documentation comments
+- Unified **Annex GG Jupyter notebook** for end-to-end CHO/AUC workflows.
+- **Bootstrap CI** and **bias analysis** utilities for AUC computation.
+- Added **PyPI packaging support** (`pyproject.toml`, `setup.cfg`, `twine` upload ready).
+- Continuous Integration (CI) via **GitHub Actions** across Python 3.9–3.12.
+- **PyPI badge** added to README.
+- Support for **TestPyPI** and real **PyPI** releases.
 
 ### Fixed
-- Minor import-path issue in tests during CI
-- Improved numerical stability in CHO covariance estimation
+- CI workflow syntax and dependency issues.
+- Unit test type errors in `test_mareval_basic.py`.
+- Corrected import paths for `compute_auc` and `cho_decision_values`.
+
+### Changed
+- Simplified repo structure:
+  - Consolidated all examples into `/examples/mar_eval_annexGG.ipynb`.
+  - Updated README to reflect single unified workflow.
 
 ---
 
-## [0.1.0] – 2025-10-22
+## [0.1.0] – 2025-10-21
+
 ### Added
-- Initial public release of **mar-eval**  
-  Toolkit implementing the Annex GG framework for:
-  - Channelized Hotelling Observer (CHO) analysis  
-  - AUC computation  
-  - Statistical comparison (paired one-tailed t-test)  
-  - ΔAUC bias assessment
-
-- Packaged and distributed via TestPyPI for validation
-- Integrated GitHub Actions CI with automated multi-version testing
-- Published under MIT License
+- Initial release of **mar-eval**, the open-source toolkit for objective evaluation of **Metal Artifact Reduction (MAR)** algorithms in CT imaging.
+- Core modules:
+  - `cho.py` – Channelized Hotelling Observer (CHO) decision simulation.
+  - `stats.py` – ROC AUC computation, confidence intervals, and bias comparison.
+  - `utils.py` – Supporting math and image handling utilities.
+- Example script: `/examples/synthetic_demo.py`
+- Automated test suite with `pytest`.
 
 ---
 
-## Links
-- **Repository:** [https://github.com/cdc15000/mar-eval](https://github.com/cdc15000/mar-eval)
-- **PyPI:** [https://pypi.org/project/mar-eval/](https://pypi.org/project/mar-eval/)
+**Upcoming**
+- Cross-scanner validation utilities.
+- Integration with DICOM MAR metadata extensions.
+- Expanded model-observer templates (non-Gaussian, ROI-based).
 
