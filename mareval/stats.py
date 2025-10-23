@@ -1,38 +1,40 @@
-import numpy as np
 from sklearn.metrics import roc_auc_score
+import numpy as np
 import warnings
 
 def compute_auc(decision_values, labels, n_bootstrap: int = 2000, random_state: int = 42):
-    """
-    Compute the Area Under the ROC Curve (AUC) with 95% confidence interval.
-    """
     decision_values = np.asarray(decision_values)
     labels = np.asarray(labels)
-
     rng = np.random.default_rng(random_state)
-    auc = roc_auc_score(labels, decision_values)
 
+    # Determine binary vs multiclass automatically
+    unique_labels = np.unique(labels)
+    if len(unique_labels) > 2:
+        auc = roc_auc_score(labels, decision_values, multi_class='ovr')
+    else:
+        auc = roc_auc_score(labels, decision_values)
+
+    # Bootstrap CI
     boot = []
     n = len(labels)
     for _ in range(n_bootstrap):
         idx = rng.integers(0, n, n)
         sample_labels = labels[idx]
         sample_values = decision_values[idx]
-
-        # Skip resamples that contain only one class
         if len(np.unique(sample_labels)) < 2:
             continue
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            try:
+        try:
+            if len(np.unique(sample_labels)) > 2:
+                boot_auc = roc_auc_score(sample_labels, sample_values, multi_class='ovr')
+            else:
                 boot_auc = roc_auc_score(sample_labels, sample_values)
-                boot.append(boot_auc)
-            except ValueError:
-                continue
+            boot.append(boot_auc)
+        except ValueError:
+            continue
 
     ci = (np.percentile(boot, 2.5), np.percentile(boot, 97.5)) if boot else (auc, auc)
     return {"auc": auc, "ci": ci, "n_bootstrap": len(boot)}
+
 
 
 def compare_auc(decision_values_mar, decision_values_nomar, labels):
