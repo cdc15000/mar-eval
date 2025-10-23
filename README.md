@@ -1,102 +1,80 @@
 # mar-eval
+
 ![CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)
 
-A Python toolkit for evaluating **Metal Artifact Reduction (MAR)** performance in CT imaging.
+**mar-eval** is a Python toolkit for evaluating Metal Artifact Reduction (MAR) performance in computed tomography (CT) imaging.
+It implements key components described in *Annex GG* of IEC 60601-2-44 (Ed. 4 draft), including Channelized Hotelling Observer (CHO) analysis, AUC computation, statistical comparison, and bias assessment.
 
 ---
 
-## Overview
+## 🚀 Installation
 
-**mar-eval** provides a reproducible framework for evaluating MAR performance using objective, task-based metrics.  
-It supports both **digital** and **quantitative physical** test methods consistent with the procedures described in *IEC 60601-2-44, Annex GG (informative)*.
+You can install the latest release from PyPI (or Test PyPI for experimental builds):
 
-The toolkit implements:
+```bash
+pip install mar-eval
+```
 
-- **Channelized Hotelling Observer (CHO)** analysis for lesion-detection tasks  
-- **AUC computation** as the figure of merit for detectability  
-- **Bias and statistical comparison** modules for ΔAUC analysis  
-- Modular support for simulated (digital) and scanned (physical) image datasets  
-- A transparent and open-source foundation for regulatory and manufacturer use
-
----
-
-## Installation
-
-### Option 1 – Install directly from GitHub
+To install the latest development version from GitHub:
 
 ```bash
 pip install git+https://github.com/cdc15000/mar-eval.git
 ```
 
-### Option 2 – Clone and install locally
+---
+
+## 🧠 Overview
+
+**mar-eval** provides utilities to support both digital and quantitative physical approaches to MAR evaluation as described in IEC 60601-2-44 Annex GG.
+
+Core modules include:
+- `mareval.cho` — Channelized Hotelling Observer analysis and model observer simulation.
+- `mareval.stats` — AUC computation, ΔAUC bias, and statistical comparison.
+- `mareval.utils` — Helper functions for image simulation, ROI extraction, and data organization.
+
+---
+
+## 📘 Examples
+
+The `examples/` directory includes ready-to-run Jupyter notebooks demonstrating how to use **mar-eval** for Metal Artifact Reduction (MAR) performance analysis in accordance with *Annex GG* of IEC 60601-2-44 (Ed. 4 draft).  
+
+Each notebook generates synthetic data and performs **CHO analysis**, **AUC computation**, and **ΔAUC bias assessment** using `scikit-learn` ROC utilities.
+
+| Notebook | Description |
+|-----------|--------------|
+| [1_intro_to_mar_eval.ipynb](examples/1_intro_to_mar_eval.ipynb) | Quick start example — simulate images, compute AUC, visualize ROC curves |
+| [2_cho_auc_analysis.ipynb](examples/2_cho_auc_analysis.ipynb) | Detailed workflow — perform CHO analysis, derive AUC distributions, and assess detectability |
+| [3_bias_and_statistical_comparison.ipynb](examples/3_bias_and_statistical_comparison.ipynb) | Statistical comparison — compute ΔAUC bias and perform one-tailed significance testing |
+
+To run them locally:
 
 ```bash
-git clone https://github.com/cdc15000/mar-eval.git
-cd mar-eval
-pip install .
+pip install jupyterlab mar-eval
+jupyter lab
 ```
 
----
+Then open any notebook from the `examples/` folder.
 
-## Example Usage
-
-```python
-from mareval.cho import compute_cho
-from mareval.stats import compute_auc
-
-# Example: run CHO analysis on lesion-present and lesion-absent image sets
-auc = compute_auc(lesion_present, lesion_absent)
-print(f"AUC = {auc:.3f}")
-```
-
-For a complete demonstration, see the example script:  
-[`examples/synthetic_demo.py`](examples/synthetic_demo.py)
+> 💡 You can view the notebooks online in GitHub’s built-in Jupyter viewer.
 
 ---
 
-### Example Notebooks
-See the `examples/` directory for ready-to-run Jupyter notebooks demonstrating:
-- **CHO and AUC computation** (`1_intro_to_mar_eval.ipynb`)
-- **Full CHO workflow** (`2_cho_auc_analysis.ipynb`)
-- **Bias and statistical comparison (ΔAUC)** (`3_bias_and_statistical_comparison.ipynb`)
+## 🧩 Versioning and Releases
+
+Version tags correspond to formal document references (e.g., *Annex GG v0.1.0*).
+Each release is listed in the [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Features
+## 🧾 Citation
 
-| Category | Description |
-|-----------|--------------|
-| **CHO Analysis** | Implements a channelized Hotelling observer for model-based detectability tasks |
-| **AUC Metrics** | Computes area under the ROC curve for lesion-detection performance |
-| **Bias Assessment** | Quantifies ΔAUC between MAR-enabled and non-MAR reconstructions |
-| **Statistical Comparison** | Supports one-tailed paired *t*-tests or nonparametric equivalents |
-| **Extensibility** | Designed for integration with validated simulators and test devices |
+If you use **mar-eval** in your research or regulatory documentation, please cite:
+
+> Cocchiaraley, C.D. (2025). *mar-eval: Annex GG Toolkit for MAR Performance Evaluation.*  
+> GitHub Repository: https://github.com/cdc15000/mar-eval
 
 ---
 
-## Contributing
+## 📄 License
 
-Contributions are welcome.  
-If you identify issues, propose improvements, or want to extend the toolkit, please open an [Issue](https://github.com/cdc15000/mar-eval/issues) or submit a [Pull Request](https://github.com/cdc15000/mar-eval/pulls).
-
----
-
-## Citation
-
-If you use this toolkit in academic or regulatory work, please cite:
-
-> Cocchiaraley, C.D., *mar-eval: A Python Toolkit for Objective Evaluation of Metal Artifact Reduction in CT Imaging* (2025).  
-> Available at: [https://github.com/cdc15000/mar-eval](https://github.com/cdc15000/mar-eval)
-
----
-
-## License
-
-This project is licensed under the MIT License.  
-See [LICENSE](LICENSE) for details.
-
----
-
-## Acknowledgment
-
-Development of this toolkit is informed by ongoing work within **IEC TC 62 / SC 62B WG 30** and related DICOM initiatives on Metal Artifact Reduction (MAR) in CT imaging.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
