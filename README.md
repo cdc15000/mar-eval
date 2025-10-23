@@ -1,4 +1,4 @@
-# mar-eval 🩻  
+# mar-eval  
 **Objective Evaluation Toolkit for Metal Artifact Reduction (MAR) Algorithms in CT Imaging**
 
 [![mar-eval CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions)
@@ -8,7 +8,7 @@ It enables objective evaluation of **Metal Artifact Reduction (MAR)** algorithms
 
 ---
 
-## 🔍 Purpose
+## Purpose
 
 `mar-eval` supports regulatory, clinical, and technical validation of MAR performance by providing reproducible, quantitative methods for:
 - Computing **Area Under the ROC Curve (AUC)** using CHO-derived decision variables  
@@ -18,7 +18,7 @@ It enables objective evaluation of **Metal Artifact Reduction (MAR)** algorithms
 
 ---
 
-## 📘 Example Notebook
+## Example Notebook
 
 A runnable Jupyter Notebook, [`examples/mar_eval_demo.ipynb`](examples/mar_eval_demo.ipynb), walks through the full workflow described in **Annex GG**:
 
@@ -33,7 +33,7 @@ A runnable Jupyter Notebook, [`examples/mar_eval_demo.ipynb`](examples/mar_eval_
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 Install directly from [PyPI](https://pypi.org/project/mar-eval/):
 
@@ -49,7 +49,7 @@ pip install git+https://github.com/cdc15000/mar-eval.git
 
 ---
 
-## 🧪 Running the Example
+## Running the Example
 
 ```bash
 # Clone the repository
@@ -68,7 +68,7 @@ examples/mar_eval_demo.ipynb
 
 ---
 
-## 📊 Output Example
+## Output Example
 
 The notebook produces AUC estimates and statistical comparison similar to:
 
@@ -80,7 +80,7 @@ AUC (with MAR): 0.504  CI: (0.445, 0.558)
 
 ---
 
-## 🧩 Package Structure
+## Package Structure
 
 ```
 mareval/
@@ -96,7 +96,7 @@ tests/
 
 ---
 
-## 🧾 Citation
+## Citation
 
 If you use `mar-eval` in your research, please cite:
 
@@ -105,13 +105,13 @@ If you use `mar-eval` in your research, please cite:
 
 ---
 
-## 🪪 License
+## License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, issue reports, and pull requests are welcome.  
 Please open an [issue](https://github.com/cdc15000/mar-eval/issues) or submit a PR with your proposed improvements.
