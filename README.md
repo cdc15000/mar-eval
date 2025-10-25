@@ -22,7 +22,7 @@
 
 ## Example Notebook
 
-A Jupyter Notebook, [`examples/mar_eval_demo.ipynb`](examples/mar_eval_demo.ipynb), walks through the full workflow described in **Annex GG**:
+A [Jupyter Notebook](examples/mar_eval_demo.ipynb) walks through the full workflow described in **Annex GG**:
 
 1. **GG.2 – Model Observer Task**  
    Simulates lesion-present and lesion-absent image sets using Gaussian statistics.  
