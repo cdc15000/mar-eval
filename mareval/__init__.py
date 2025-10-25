@@ -7,7 +7,6 @@ Core CHO / AUC / stats:
     - cho_decision_values
     - fit_channels_pca
     - compute_auc
-    - compute_auc_ci
     - compare_auc_paired
     - bias_assessment
 
@@ -30,7 +29,6 @@ from .cho import (
 
 from .stats import (
     compute_auc,
-    compute_auc_ci,
     compare_auc_paired,
     bias_assessment,
 )
@@ -63,7 +61,6 @@ __all__ = [
     "fit_channels_pca",
     # Stats
     "compute_auc",
-    "compute_auc_ci",
     "compare_auc_paired",
     "bias_assessment",
     # ROI / I/O / grid

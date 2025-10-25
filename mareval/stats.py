@@ -1,124 +1,147 @@
-from __future__ import annotations
+"""
+mareval.stats
+Statistical utilities for CHO and AUC analysis in MAR-Eval.
+
+Implements:
+- compute_auc():      Compute AUC with bootstrap confidence intervals
+- compare_auc_paired(): Paired comparison of AUCs (e.g., MAR vs. FBP)
+- bias_assessment():  Quantify bias between two AUC distributions
+
+References:
+- Vaishnav et al. (2020), Med Phys 47(8): “CT metal artifact reduction algorithms: Toward a framework for objective performance assessment.”
+- Annex GG (IEC 60601-2-44 Ed.4 Draft): Task-based assessment of MAR algorithms
+"""
+
 import numpy as np
-from numpy.typing import ArrayLike
-from typing import Tuple, Dict
-from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.metrics import roc_auc_score
 from scipy import stats
 
-def _ensure_binary_labels(labels: ArrayLike) -> np.ndarray:
-    """Coerce labels to {0,1} if they are not already binary."""
-    y = np.asarray(labels)
-    uniq = np.unique(y)
-    if len(uniq) == 2 and set(uniq.tolist()) == {0, 1}:
-        return y.astype(int)
-    # Fallback: map any non-zero to 1 (for robustness in simple tests)
-    return (y != 0).astype(int)
 
-def compute_auc(decision_values: ArrayLike, labels: ArrayLike) -> float:
+# -------------------------------------------------------------------------
+# Compute AUC with bootstrap CI
+# -------------------------------------------------------------------------
+def compute_auc(decision_values, labels, n_bootstrap: int = 2000, random_state: int = 42):
     """
-    Compute ROC AUC (binary). Returns a scalar float in [0,1].
-    """
-    y = _ensure_binary_labels(labels)
-    s = np.asarray(decision_values, dtype=float)
-    return float(roc_auc_score(y, s))
+    Compute the Area Under the ROC Curve (AUC) with 95% bootstrap confidence interval.
 
-def compute_auc_ci(
-    decision_values: ArrayLike,
-    labels: ArrayLike,
-    n_bootstrap: int = 2000,
-    random_state: int = 42,
-    alpha: float = 0.05,
-) -> Dict[str, object]:
+    Parameters
+    ----------
+    decision_values : array-like
+        Decision statistic values (e.g., CHO scores).
+    labels : array-like
+        Ground truth binary labels (0 = lesion-absent, 1 = lesion-present).
+    n_bootstrap : int, optional
+        Number of bootstrap iterations for CI estimation.
+    random_state : int, optional
+        Random-number seed for reproducibility.
+
+    Returns
+    -------
+    dict
+        {
+          "auc": float,
+          "ci": (float, float),
+          "n_bootstrap": int
+        }
     """
-    ROC AUC with bootstrap CI.
-    Returns dict with keys: auc, ci=(lo, hi), n_bootstrap
-    """
+    labels = np.asarray(labels)
+    decision_values = np.asarray(decision_values)
     rng = np.random.default_rng(random_state)
-    y = _ensure_binary_labels(labels)
-    s = np.asarray(decision_values, dtype=float)
 
-    auc = float(roc_auc_score(y, s))
-    n = len(y)
+    try:
+        auc = roc_auc_score(labels, decision_values)
+    except ValueError:
+        return {"auc": np.nan, "ci": (np.nan, np.nan), "n_bootstrap": n_bootstrap}
+
+    # Bootstrap 95% CI
     boot = []
+    n = len(labels)
     for _ in range(n_bootstrap):
         idx = rng.integers(0, n, n)
-        yb = y[idx]
-        sb = s[idx]
-        # Skip degenerate resamples that have a single class
-        if len(np.unique(yb)) < 2:
+        try:
+            boot_auc = roc_auc_score(labels[idx], decision_values[idx])
+            boot.append(boot_auc)
+        except ValueError:
             continue
-        boot.append(float(roc_auc_score(yb, sb)))
 
-    if len(boot) == 0:
+    if boot:
+        ci = (np.percentile(boot, 2.5), np.percentile(boot, 97.5))
+    else:
         ci = (auc, auc)
-    else:
-        lo, hi = np.quantile(boot, [alpha / 2, 1 - alpha / 2])
-        ci = (float(lo), float(hi))
 
-    return {"auc": auc, "ci": ci, "n_bootstrap": n_bootstrap}
+    return {"auc": float(auc), "ci": tuple(map(float, ci)), "n_bootstrap": n_bootstrap}
 
-def compare_auc_paired(
-    dv_mar: ArrayLike,
-    y_mar: ArrayLike,
-    dv_fbp: ArrayLike,
-    y_fbp: ArrayLike,
-    one_tailed: bool = True,
-) -> Dict[str, float]:
+
+# -------------------------------------------------------------------------
+# Paired AUC comparison (MAR vs. FBP)
+# -------------------------------------------------------------------------
+def compare_auc_paired(auc1, auc2):
     """
-    One-tailed paired comparison of AUC(MAR) vs AUC(FBP).
-    Simple approach: pair by index, compute per-pair differences in decision scores,
-    then test AUC difference via paired t-test on subject-level AUCs across bootstrap
-    resamples. Keeps compute lightweight and reproducible.
+    Perform paired comparison of AUCs using a one-tailed paired t-test.
 
-    Returns dict: {"auc_mar": ..., "auc_fbp": ..., "delta_auc": ..., "p_value": ...}
+    Parameters
+    ----------
+    auc1 : array-like
+        AUC values for condition 1 (e.g., FBP).
+    auc2 : array-like
+        AUC values for condition 2 (e.g., MAR).
+
+    Returns
+    -------
+    dict
+        {
+          "delta_auc": float,
+          "p_value": float,
+          "mean_auc1": float,
+          "mean_auc2": float
+        }
     """
-    y0 = _ensure_binary_labels(y_fbp)
-    y1 = _ensure_binary_labels(y_mar)
-    s0 = np.asarray(dv_fbp, dtype=float)
-    s1 = np.asarray(dv_mar, dtype=float)
-
-    # Basic AUCs
-    auc_fbp = float(roc_auc_score(y0, s0))
-    auc_mar = float(roc_auc_score(y1, s1))
-    delta = auc_mar - auc_fbp
-
-    # Paired t-test via bootstrap pairing (same RNG sequence)
-    rng = np.random.default_rng(123)
-    n = min(len(y0), len(y1))
-    B = 2000
-    diffs = []
-    for _ in range(B):
-        idx = rng.integers(0, n, n)
-        yb0, sb0 = y0[idx], s0[idx]
-        yb1, sb1 = y1[idx], s1[idx]
-        # Skip degenerate
-        if len(np.unique(yb0)) < 2 or len(np.unique(yb1)) < 2:
-            continue
-        diffs.append(float(roc_auc_score(yb1, sb1) - roc_auc_score(yb0, sb0)))
-
-    if len(diffs) < 5:
-        # fallback unpaired normal approx
-        se = 0.02
-        z = delta / se
-        p = 1 - stats.norm.cdf(z) if one_tailed else 2 * (1 - stats.norm.cdf(abs(z)))
-    else:
-        d = np.array(diffs, dtype=float)
-        tstat = (np.mean(d) - 0.0) / (np.std(d, ddof=1) / np.sqrt(len(d)))
-        df = len(d) - 1
-        if one_tailed:
-            p = 1 - stats.t.cdf(tstat, df=df)
-        else:
-            p = 2 * (1 - stats.t.cdf(abs(tstat), df=df))
+    auc1 = np.asarray(auc1)
+    auc2 = np.asarray(auc2)
+    delta = auc2 - auc1
+    t_stat, p_value = stats.ttest_rel(auc2, auc1, alternative="greater")
 
     return {
-        "auc_mar": auc_mar,
-        "auc_fbp": auc_fbp,
-        "delta_auc": delta,
-        "p_value": float(p),
+        "delta_auc": float(np.mean(delta)),
+        "p_value": float(p_value),
+        "mean_auc1": float(np.mean(auc1)),
+        "mean_auc2": float(np.mean(auc2)),
     }
 
-def bias_assessment(auc_mar: float, auc_fbp: float) -> Dict[str, float]:
+
+# -------------------------------------------------------------------------
+# Bias assessment
+# -------------------------------------------------------------------------
+def bias_assessment(auc_nominal, auc_reference):
     """
-    Bias assessment as ΔAUC = AUC(MAR) - AUC(FBP).
+    Assess bias between MAR and reference AUC values.
+
+    Parameters
+    ----------
+    auc_nominal : array-like
+        AUCs from MAR condition.
+    auc_reference : array-like
+        AUCs from FBP (reference) condition.
+
+    Returns
+    -------
+    dict
+        {
+          "bias_mean": float,
+          "bias_std": float,
+          "bias_percent": float
+        }
     """
-    return {"delta_auc": float(auc_mar - auc_fbp)}
+    auc_nominal = np.asarray(auc_nominal)
+    auc_reference = np.asarray(auc_reference)
+    bias = auc_nominal - auc_reference
+
+    bias_mean = np.mean(bias)
+    bias_std = np.std(bias)
+    bias_percent = 100.0 * bias_mean / np.mean(auc_reference)
+
+    return {
+        "bias_mean": float(bias_mean),
+        "bias_std": float(bias_std),
+        "bias_percent": float(bias_percent),
+    }
