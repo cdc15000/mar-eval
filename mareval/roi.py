@@ -1,57 +1,22 @@
-from __future__ import annotations
 import numpy as np
-from numpy.typing import ArrayLike
-from typing import List, Tuple
+from typing import Tuple, List
 
-def extract_rois(
-    img: np.ndarray,
-    centers: List[Tuple[int, int]],
-    size: int,
-) -> np.ndarray:
-    """
-    Extract square ROIs from a 2D image.
+def extract_roi(image: np.ndarray, center: Tuple[int, int], size: Tuple[int, int]) -> np.ndarray:
+    """Extract ROI (h, w) from image at center (y, x). Pads with edge values if needed."""
+    h, w = size
+    cy, cx = center
+    y0 = max(0, cy - h//2); y1 = min(image.shape[0], y0 + h)
+    x0 = max(0, cx - w//2); x1 = min(image.shape[1], x0 + w)
+    roi = np.empty((h, w), dtype=image.dtype)
+    roi.fill(float(image[cy, cx]))
+    roi[0:(y1-y0), 0:(x1-x0)] = image[y0:y1, x0:x1]
+    return roi
 
-    Parameters
-    ----------
-    img : array, shape (H, W)
-    centers : list of (row, col)
-    size : int, ROI size (pixels). Must be odd preferred.
-
-    Returns
-    -------
-    rois : array, shape (len(centers), size*size)
-        Flattened ROIs (row-major).
-    """
-    H, W = img.shape
-    r = size // 2
-    out = []
-    for (cy, cx) in centers:
-        y0, y1 = max(0, cy - r), min(H, cy + r + 1)
-        x0, x1 = max(0, cx - r), min(W, cx + r + 1)
-        patch = np.zeros((size, size), dtype=float)
-        sy = y1 - y0
-        sx = x1 - x0
-        patch[(r - (cy - y0)):(r - (cy - y0) + sy), (r - (cx - x0)):(r - (cx - x0) + sx)] = img[y0:y1, x0:x1]
-        out.append(patch.reshape(-1))
-    return np.stack(out, axis=0)
-
-def extract_rois_batch(
-    images: np.ndarray,
-    centers: List[Tuple[int, int]],
-    size: int,
-) -> np.ndarray:
-    """
-    Extract ROIs for a batch of images.
-
-    Parameters
-    ----------
-    images : array, shape (N, H, W)
-    centers : list of (row, col)
-    size : int
-
-    Returns
-    -------
-    rois : array, shape (N*len(centers), size*size)
-    """
-    batches = [extract_rois(img, centers, size) for img in images]
-    return np.vstack(batches)
+def batch_extract_rois(images: List[np.ndarray], centers: List[Tuple[int,int]], size: Tuple[int,int]):
+    """Extract all ROIs for a list of images; returns ROIs flattened to (n, q)."""
+    rois = []
+    for img in images:
+        for c in centers:
+            r = extract_roi(img, c, size)
+            rois.append(r.ravel())
+    return np.asarray(rois)

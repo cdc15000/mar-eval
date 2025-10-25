@@ -1,124 +1,144 @@
-# mar-eval  
-**Objective Evaluation Toolkit for Metal Artifact Reduction (MAR) Algorithms in CT Imaging**
+# mar-eval
 
-[![mar-eval CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions)
+Task-based evaluation toolkit for **Metal Artifact Reduction (MAR)** in CT imaging, aligned with the **Annex GG** framework.
+
+[![CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml)
 [![PyPI version](https://img.shields.io/pypi/v/mar-eval.svg)](https://pypi.org/project/mar-eval/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-
-`mar-eval` is an open-source Python toolkit that implements the analysis framework described in **Annex GG** of the proposed IEC 60601-2-44 Ed. 4.  
-It enables objective evaluation of **Metal Artifact Reduction (MAR)** algorithms in CT imaging using the **Channelized Hotelling Observer (CHO)**, **AUC-based detectability metrics**, and **bias assessment** between MAR and non-MAR reconstructions.
 
 ---
 
-## Purpose
+## What is this?
 
-`mar-eval` supports regulatory, clinical, and technical validation of MAR performance by providing reproducible, quantitative methods for:
-- Computing **Area Under the ROC Curve (AUC)** using CHO-derived decision variables  
-- Performing **paired statistical comparison** of MAR vs. non-MAR detectability  
-- Estimating **confidence intervals** and **ΔAUC bias**  
-- Enabling interoperability across CT simulators, physical phantoms, and regulatory test environments
+**mar-eval** implements a pragmatic, reproducible pipeline for MAR performance assessment using a **Channelized Hotelling Observer (CHO)**, **AUC** computation (with bootstrap CI), **one‑tailed paired t‑tests**, and **ΔAUC bias assessment**. It supports:
 
----
+- **Simulator-driven inputs** (e.g., DukeSim) via a YAML config + loader that organizes the (dose, contrast, realization, recon, class) grid prescribed in Annex GG.
+- **ROI‑based CHO** with PCA-derived channels and pooled covariance (with small Tikhonov regularization).
+- Clean **reporting helpers** (CSV tables) and **matplotlib** visualizations (AUC and ΔAUC heatmaps).
+- A runnable **unified notebook** that mirrors Annex GG end‑to‑end for the **adult chest with titanium spinal rod** example.
 
-## Example Notebook
-
-A runnable Jupyter Notebook, [`examples/mar_eval_demo.ipynb`](examples/mar_eval_demo.ipynb), walks through the full workflow described in **Annex GG**:
-
-1. **GG.2 – Model Observer Task**  
-   Simulates lesion-present and lesion-absent image sets using Gaussian statistics.  
-2. **GG.3 – Data Evaluation**  
-   Computes CHO decision values, ROC curves, and AUC estimates.  
-3. **GG.4 – Statistical Comparison**  
-   Uses a one-tailed paired t-test to detect significant improvements in detectability.  
-4. **GG.5 – Bias Assessment**  
-   Quantifies ΔAUC and confidence intervals to evaluate MAR-related bias.
+> The toolkit focuses on the **type test** use case, i.e., premarket evaluation on representative systems and validated phantoms or realistic simulation outputs.
 
 ---
 
-## Installation
-
-Install directly from [PyPI](https://pypi.org/project/mar-eval/):
+## Install
 
 ```bash
 pip install mar-eval
+# for notebook demo & plots you may also want:
+pip install matplotlib jupyterlab pyyaml
 ```
 
-Or, for the latest development version:
+Python ≥ 3.9 is supported.
 
-```bash
-pip install git+https://github.com/cdc15000/mar-eval.git
+---
+
+## Quick start (synthetic)
+
+```python
+import numpy as np
+from mareval import (
+    generate_synthetic_study, extract_roi, batch_extract_rois,
+    build_pca_channels, cho_template, cho_decision_values,
+    compute_auc_ci
+)
+
+cfg = dict(image_shape=(64,64), doses=3, contrasts=3, realizations=4, rng_seed=0)
+study = generate_synthetic_study(cfg)
+images = study["images"]
+centers = [(32, 24)]
+roi_size = (17,17)
+
+# simple training set for channels
+train_imgs = [images[(0,0,0,'FBP','absent')], images[(2,2,0,'MAR','present')]]
+train_rois = batch_extract_rois(train_imgs, centers, roi_size)
+U = build_pca_channels(train_rois, n_channels=8)
+
+# one cell AUC (FBP)
+pos = []; neg = []
+for r in range(cfg['realizations']):
+    pos.append(extract_roi(images[(0,0,r,'FBP','present')], centers[0], roi_size).ravel())
+    neg.append(extract_roi(images[(0,0,r,'FBP','absent')], centers[0], roi_size).ravel())
+
+import numpy as np
+pos = np.asarray(pos); neg = np.asarray(neg)
+ch_pos = (pos - pos.mean(0)) @ U
+ch_neg = (neg - neg.mean(0)) @ U
+w = cho_template(ch_pos, ch_neg, lambda_reg=1e-3)
+
+s = np.concatenate([ch_pos @ w, ch_neg @ w])
+y = np.array([1]*len(ch_pos) + [0]*len(ch_neg))
+res = compute_auc_ci(s, y, n_bootstrap=1000)
+print(res)  # {'auc': ..., 'ci': (..., ...), 'n_bootstrap': 1000}
 ```
 
 ---
 
-## Running the Example
+## Annex GG “adult chest / spinal rod” example
 
-```bash
-# Clone the repository
-git clone https://github.com/cdc15000/mar-eval.git
-cd mar-eval
+- Config: `configs/adult_chest_spinal_rod.yaml`
+- Notebook: `notebooks/annex_gg_full_demo.ipynb`
 
-# Install dependencies
-pip install -r requirements.txt
+The notebook executes the full flow:
 
-# Launch JupyterLab
-jupyter lab
+1. **Load config** and generate synthetic images approximating an adult chest with a **6 mm titanium rod** and a **5 mm lesion** adjacent to the rod centerline.
+2. **Preview** grid counts and an example slice.
+3. **ROI extraction** and **channel learning** (PCA).
+4. **CHO template** + **AUC per (dose, contrast)** for both **FBP** and **MAR**.
+5. **Paired one‑tailed t‑test** and **ΔAUC bias assessment**.
+6. **Heatmaps** for AUC and ΔAUC.
+7. **CSV tables** (Annex‑GG‑style) in `outputs/`.
 
-# Open and run the example notebook
-examples/mar_eval_demo.ipynb
-```
-
----
-
-## Output Example
-
-The notebook produces AUC estimates and statistical comparison similar to:
-
-```
-AUC (no MAR): 0.484  CI: (0.423, 0.538)
-AUC (with MAR): 0.504  CI: (0.445, 0.558)
-ΔAUC = 0.020, p = 0.0005
-```
+> The synthetic generator produces realistic streak‑like artifacts and dose‑dependent noise; MAR reduces streak amplitude and introduces mild smoothing.
 
 ---
 
-## Package Structure
+## API Highlights
 
+```python
+from mareval import (
+  build_pca_channels, cho_template, cho_decision_values,
+  compute_auc, compute_auc_ci, paired_ttest_one_tailed, delta_auc_bias_assessment,
+  generate_synthetic_study, extract_roi, batch_extract_rois,
+  make_parameter_grid, save_auc_table_csv, save_delta_auc_table_csv
+)
 ```
-mareval/
-├── __init__.py
-├── cho.py           # CHO computation routines
-├── stats.py         # AUC, bias, and statistical testing
-├── utils.py         # Helper utilities
-examples/
-└── mar_eval_demo.ipynb
-tests/
-└── test_mareval_basic.py
-```
+
+- **CHO**
+  - `build_pca_channels(rois, n_channels=16, whiten=True)`
+  - `cho_template(ch_pos, ch_neg, lambda_reg=1e-3)`
+  - `cho_decision_values(ch_samples, w)`
+- **AUC & Stats**
+  - `compute_auc(values, labels) -> float`
+  - `compute_auc_ci(values, labels, n_bootstrap=2000) -> dict`
+  - `paired_ttest_one_tailed(a, b) -> (delta_mean, p_one)`
+  - `delta_auc_bias_assessment(auc_fb, auc_mar) -> dict`
+- **Simulator flow**
+  - `generate_synthetic_study(cfg_dict)`
+  - `extract_roi(img, center, size)` / `batch_extract_rois([...], centers, size)`
+  - `make_parameter_grid(...)`
+  - `save_auc_table_csv(...)`, `save_delta_auc_table_csv(...)`
 
 ---
 
-## Citation
+## Tests / CI
 
-If you use `mar-eval` in your research, please cite:
+A light **smoke test** covers the end‑to‑end pipeline on a tiny synthetic set:
 
-> C.D. Cocchiaraley, *Annex GG — Objective evaluation of Metal Artifact Reduction algorithms in CT imaging*,  
-> Proposed addition to IEC 60601-2-44 Ed. 4 (2025).
+```
+pytest -q
+```
+
+GitHub Actions runs the tests across 3.9–3.12.
+
+---
+
+## Versioning
+
+- This update introduces **v0.3.0** with simulator workflow, unified Annex‑GG notebook, and reporting/visualization helpers.
+- Version tags are used to align releases with document snapshots (e.g., Annex‑GG draft refs).
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-## Contributing
-
-Contributions, issue reports, and pull requests are welcome.  
-Please open an [issue](https://github.com/cdc15000/mar-eval/issues) or submit a PR with your proposed improvements.
-
----
-
-© 2025 Christopher D. Cocchiaraley. All rights reserved.
+MIT

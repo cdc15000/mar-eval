@@ -1,75 +1,52 @@
+"""mar-eval: Task-based evaluation toolkit for MAR in CT (Annex GG).
+
+Exports:
+- CHO pipeline utilities (channel building, decision values)
+- AUC computation with bootstrap CI
+- Paired one-tailed t-test and ΔAUC bias assessment
+- Simulation IO helpers, ROI tools, grid helpers, reporting, visualization
 """
-mar-eval: Metal Artifact Reduction evaluation toolkit (Annex GG oriented)
-
-Public API
-----------
-Core CHO / AUC / stats:
-    - cho_decision_values
-    - fit_channels_pca
-    - compute_auc
-    - compare_auc_paired
-    - bias_assessment
-
-ROI & data I/O:
-    - extract_rois
-    - extract_rois_batch
-    - load_simulation_manifest
-    - iter_param_grid
-
-Visualization & reporting:
-    - plot_roc
-    - plot_score_hist
-    - make_results_report
-"""
-
 from .cho import (
+    build_pca_channels,
+    apply_channels,
+    cho_template,
     cho_decision_values,
-    fit_channels_pca,
 )
-
 from .stats import (
     compute_auc,
-    compare_auc_paired,
-    bias_assessment,
+    compute_auc_ci,
+    paired_ttest_one_tailed,
+    delta_auc_bias_assessment,
 )
-
-from .roi import (
-    extract_rois,
-    extract_rois_batch,
-)
-
 from .io_sim import (
-    load_simulation_manifest,
+    generate_synthetic_study,
 )
-
+from .roi import (
+    extract_roi,
+    batch_extract_rois,
+)
 from .grid import (
-    iter_param_grid,
+    make_parameter_grid,
+    grid_to_index,
 )
-
-from .viz import (
-    plot_roc,
-    plot_score_hist,
-)
-
 from .reporting import (
-    make_results_report,
+    save_auc_table_csv,
+    save_delta_auc_table_csv,
+)
+from .viz import (
+    plot_auc_heatmap,
+    plot_delta_auc_heatmap,
 )
 
 __all__ = [
-    # CHO
-    "cho_decision_values",
-    "fit_channels_pca",
-    # Stats
-    "compute_auc",
-    "compare_auc_paired",
-    "bias_assessment",
-    # ROI / I/O / grid
-    "extract_rois",
-    "extract_rois_batch",
-    "load_simulation_manifest",
-    "iter_param_grid",
-    # Viz / reporting
-    "plot_roc",
-    "plot_score_hist",
-    "make_results_report",
+    # cho
+    "build_pca_channels", "apply_channels", "cho_template", "cho_decision_values",
+    # stats
+    "compute_auc", "compute_auc_ci", "paired_ttest_one_tailed", "delta_auc_bias_assessment",
+    # io / roi / grid
+    "generate_synthetic_study", "extract_roi", "batch_extract_rois",
+    "make_parameter_grid", "grid_to_index",
+    # reporting / viz
+    "save_auc_table_csv", "save_delta_auc_table_csv",
+    "plot_auc_heatmap", "plot_delta_auc_heatmap",
 ]

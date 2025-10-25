@@ -1,0 +1,17 @@
+# Adult chest with titanium spinal rod; lesion adjacent (≤12 mm) to rod centerline
+image_shape: [128, 128]
+lesion_radius_px: 3
+doses: 11            # 0..10
+contrasts: 7         # 1.00 .. 1.06
+realizations: 10
+recon_types: [FBP, MAR]
+classes: [absent, present]
+base_bg_mean: 1000.0
+base_bg_std: 20.0
+dose_noise_scale: 1.0
+contrast_min: 1.00
+contrast_max: 1.06
+rng_seed: 7
+roi_size: [25, 25]
+channels: 16
+lambda_reg: 0.001

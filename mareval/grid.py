@@ -1,20 +1,15 @@
-from __future__ import annotations
-from typing import Iterable, Dict, Iterator
+from typing import Dict, List, Tuple
 
-def iter_param_grid(
-    doses: Iterable[int],
-    contrasts: Iterable[float],
-    recon_types: Iterable[str],
-    classes: Iterable[str],
-) -> Iterator[Dict[str, object]]:
-    """
-    Iterate over a factorial grid of simulation parameters.
+def make_parameter_grid(dose_levels: List[int], contrast_levels: List[float], realizations: int,
+                        recon_types: Tuple[str, ...], classes: Tuple[str, ...]) -> List[Dict]:
+    grid = []
+    for d in dose_levels:
+        for j, _ in enumerate(contrast_levels):
+            for r in range(realizations):
+                for recon in recon_types:
+                    for cls in classes:
+                        grid.append({"dose": d, "contrast_idx": j, "realization": r, "recon": recon, "cls": cls})
+    return grid
 
-    Yields dicts like:
-        {"dose": d, "contrast": c, "recon": r, "class": cls}
-    """
-    for d in doses:
-        for c in contrasts:
-            for r in recon_types:
-                for cls in classes:
-                    yield {"dose": d, "contrast": c, "recon": r, "class": cls}
+def grid_to_index(item: Dict) -> Tuple:
+    return (item["dose"], item["contrast_idx"], item["realization"], item["recon"], item["cls"])

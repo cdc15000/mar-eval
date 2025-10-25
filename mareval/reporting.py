@@ -1,27 +1,25 @@
-from __future__ import annotations
-from typing import Dict, Any, List
-import json
+import csv
+from typing import List
 
-def make_results_report(
-    auc_mar: float,
-    auc_fbp: float,
-    delta_auc: float,
-    p_value: float,
-    meta: Dict[str, Any],
-) -> Dict[str, Any]:
-    """
-    Produce a JSON-friendly results record for Annex GG-style reporting.
-    """
-    return {
-        "analysis": {
-            "auc_mar": float(auc_mar),
-            "auc_fbp": float(auc_fbp),
-            "delta_auc": float(delta_auc),
-            "p_value_one_tailed": float(p_value),
-        },
-        "metadata": dict(meta),
-    }
+def save_auc_table_csv(path: str, dose_levels: List[int], contrast_levels: List[float], auc_grid_mar, auc_grid_fbp):
+    """Write CSV table with AUC per (dose, contrast) for MAR and FBP."""
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        header = ["dose \\ contrast"] + [f"c{j}" for j in range(len(contrast_levels))]
+        w.writerow(header)
+        for i, d in enumerate(dose_levels):
+            row = [f"d{d}"]
+            for j in range(len(contrast_levels)):
+                row.append(f"MAR={auc_grid_mar[i,j]:.3f};FBP={auc_grid_fbp[i,j]:.3f}")
+            w.writerow(row)
 
-def dump_report_json(path: str, report: Dict[str, Any]) -> None:
-    with open(path, "w") as f:
-        json.dump(report, f, indent=2)
+def save_delta_auc_table_csv(path: str, dose_levels: List[int], contrast_levels: List[float], delta_auc_grid):
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        header = ["dose \\ contrast"] + [f"c{j}" for j in range(len(contrast_levels))]
+        w.writerow(header)
+        for i, d in enumerate(dose_levels):
+            row = [f"d{d}"]
+            for j in range(len(contrast_levels)):
+                row.append(f"{delta_auc_grid[i,j]:.3f}")
+            w.writerow(row)
