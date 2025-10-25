@@ -6,8 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 
-`mar-eval` is an open-source Python toolkit that implements the analysis framework described in **Annex GG** of the proposed IEC 60601-2-44 Ed. 4.  
-It enables objective evaluation of **Metal Artifact Reduction (MAR)** algorithms in CT imaging using the **Channelized Hotelling Observer (CHO)**, **AUC-based detectability metrics**, and **bias assessment** between MAR and non-MAR reconstructions.
+`mar-eval` is an open-source Python toolkit that implements the analysis framework described in **Annex GG** of the proposed IEC 60601-2-44 Ed. 4. It enables objective evaluation of **Metal Artifact Reduction (MAR)** algorithms in CT imaging using the **Channelized Hotelling Observer (CHO)**, **AUC-based detectability metrics**, and **bias assessment** between MAR and non-MAR reconstructions.
 
 ---
 
@@ -103,8 +102,7 @@ tests/
 
 If you use `mar-eval` in your research, please cite:
 
-> C.D. Cocchiaraley, *Annex GG — Objective evaluation of Metal Artifact Reduction algorithms in CT imaging*,  
-> Proposed addition to IEC 60601-2-44 Ed. 4 (2025).
+> C.D. Cocchiaraley, *Annex GG — Objective evaluation of Metal Artifact Reduction algorithms in CT imaging*, Proposed addition to IEC 60601-2-44 Ed. 4 (2025).
 
 ---
 
