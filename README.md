@@ -1,5 +1,5 @@
 # mar-eval  
-**Objective Evaluation Toolkit for Metal Artifact Reduction (MAR) Algorithms in CT Imaging**
+**Toolkit for the Objective Evaluation of Metal Artifact Reduction (MAR) in CT Imaging**
 
 [![mar-eval CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions)
 [![PyPI version](https://img.shields.io/pypi/v/mar-eval.svg)](https://pypi.org/project/mar-eval/)
