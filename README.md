@@ -123,8 +123,6 @@ from mareval import (
   - `make_parameter_grid(...)`
   - `save_auc_table_csv(...)`, `save_delta_auc_table_csv(...)`
 
-```
-
 ---
 
 ## Tests / CI
