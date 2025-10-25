@@ -1,7 +1,18 @@
+# Python build and packaging artifacts
 __pycache__/
 *.pyc
 *.pyo
-*.DS_Store
-venv/
-.env
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Jupyter notebook checkpoints
 .ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.env/
+
+# macOS system files
+.DS_Store
