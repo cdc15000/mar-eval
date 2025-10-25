@@ -1,22 +1,27 @@
 # mar-eval
+**Toolkit for the Objective Evaluation of Metal Artifact Reduction (MAR) in CT Imaging**
 
-Task-based evaluation toolkit for **Metal Artifact Reduction (MAR)** in CT imaging, aligned with the **Annex GG** framework.
-
-[![CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml)
+[![mar-eval CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml)
 [![PyPI version](https://img.shields.io/pypi/v/mar-eval.svg)](https://pypi.org/project/mar-eval/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
 ## What is this?
 
-**mar-eval** implements a pragmatic, reproducible pipeline for MAR performance assessment using a **Channelized Hotelling Observer (CHO)**, **AUC** computation (with bootstrap CI), **one‑tailed paired t‑tests**, and **ΔAUC bias assessment**. It supports:
-
-- **Simulator-driven inputs** (e.g., DukeSim) via a YAML config + loader that organizes the (dose, contrast, realization, recon, class) grid prescribed in Annex GG.
-- **ROI‑based CHO** with PCA-derived channels and pooled covariance (with small Tikhonov regularization).
-- Clean **reporting helpers** (CSV tables) and **matplotlib** visualizations (AUC and ΔAUC heatmaps).
-- A runnable **unified notebook** that mirrors Annex GG end‑to‑end for the **adult chest with titanium spinal rod** example.
+`mar-eval` is an open-source Python toolkit that implements the analysis framework described in **Annex GG** of the proposed IEC 60601-2-44 Ed. 4. It enables objective evaluation of **Metal Artifact Reduction (MAR)** in CT imaging using the **Channelized Hotelling Observer (CHO)**, **AUC-based detectability metrics**, and **bias assessment** between MAR and Filtered-Back Projection (FBP) reconstructions.
 
 > The toolkit focuses on the **type test** use case, i.e., premarket evaluation on representative systems and validated phantoms or realistic simulation outputs.
+
+---
+
+## Example Notebook
+
+A full demo notebook is available at:
+
+notebooks/annex_gg_full_demo.ipynb
+
+This notebook reproduces the workflow described in Annex GG, from ROI extraction to AUC computation and bias evaluation.
 
 ---
 
@@ -118,6 +123,8 @@ from mareval import (
   - `make_parameter_grid(...)`
   - `save_auc_table_csv(...)`, `save_delta_auc_table_csv(...)`
 
+```
+
 ---
 
 ## Tests / CI
@@ -129,6 +136,13 @@ pytest -q
 ```
 
 GitHub Actions runs the tests across 3.9–3.12.
+---
+
+## Citation
+
+If you use `mar-eval` in your research, please cite:
+
+> C.D. Cocchiaraley, *Annex GG — Objective evaluation of Metal Artifact Reduction algorithms in CT imaging*, Proposed addition to IEC 60601-2-44 Ed. 4 (2025).
 
 ---
 
