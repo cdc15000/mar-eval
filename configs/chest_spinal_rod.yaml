@@ -1,0 +1,57 @@
+# configs/chest_spinal_rod.yaml
+# Annex GG-inspired scenario config: Adult chest with 6 mm titanium rod and 5 mm lung lesion
+
+meta:
+  name: "adult_chest_spinal_rod"
+  description: "CHO/AUC grid for FBP vs MAR; lesion-adjacent to titanium rod"
+  standard_reference: "Annex GG"
+  version: "0.1.0"
+
+paths:
+  # If using DukeSim or similar, point these to your generated images/ROIs.
+  # These can be file system paths or URIs; the toolkit doesn’t enforce the simulator.
+  dataset_root: "/path/to/simulator/output"       # change me
+  roi_manifest: "/path/to/roi_manifest.csv"       # optional: pre-extracted ROIs table
+
+grid:
+  dose_levels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]   # arbitrary units
+  contrast_levels: [1.00, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06]
+  n_realizations: 10
+  recon_types: ["FBP", "MAR"]
+  classes: ["lesion_absent", "lesion_present"]
+
+task:
+  name: "binary_lesion_detection_CHO"
+  observer: "CHO"
+  channels: "pca"                  # or "manual"
+  n_channels: 8
+  regularization: 1.0e-3
+
+acquisition:
+  tube_voltage_kvp: 120
+  tube_current_ma: 250
+  slice_thickness_mm: 1.0
+
+phantom:
+  region: "adult_chest"
+  metal:
+    type: "titanium_rod"
+    diameter_mm: 6.0
+    position: "thoracic_spine_centerline"
+  lesion:
+    shape: "ellipsoid"
+    diameter_mm: 5.0
+    contrast_relative_to_background: "grid"   # pulled from grid.contrast_levels
+  lesion_proximity:
+    definition: "adjacent"         # Adjacent (≤ 12 mm) to rod centerline
+    max_distance_mm: 12.0
+
+roi:
+  # ROI extraction is optional here; you may point to a manifest or let the toolkit compute.
+  shape: "square"
+  size_px: 32
+  extraction_strategy: "centered_on_annotations"  # e.g., “random_in_background”, “from_manifest”
+
+output:
+  results_dir: "./results/chest_spinal_rod"
+  save_intermediate: true
