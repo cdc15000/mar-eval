@@ -75,8 +75,8 @@ examples/mar_eval_demo.ipynb
 The notebook produces AUC estimates and statistical comparison similar to:
 
 ```
-AUC (no MAR): 0.484  CI: (0.423, 0.538)
-AUC (with MAR): 0.504  CI: (0.445, 0.558)
+AUC_FBP: 0.484  CI: (0.423, 0.538)
+AUC_MAR: 0.504  CI: (0.445, 0.558)
 ΔAUC = 0.020, p = 0.0005
 ```
 
