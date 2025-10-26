@@ -1,6 +1,6 @@
 [project]
 name = "mar-eval"
-version = "0.3.0"
+version = "0.3.1"
 description = "Task-based evaluation toolkit for Metal Artifact Reduction (MAR) in CT imaging (Annex GG Framework)"
 authors = [{ name = "Christopher D. Cocchiaraley" }]
 license = "MIT"
