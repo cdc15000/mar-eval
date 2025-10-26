@@ -4,8 +4,6 @@
 [![mar-eval CI](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml/badge.svg)](https://github.com/cdc15000/mar-eval/actions/workflows/tests.yml)
 [![PyPI version](https://img.shields.io/pypi/v/mar-eval.svg)](https://pypi.org/project/mar-eval/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cdc15000/mar-eval/main?labpath=notebooks%2Fannex_gg_full_demo.ipynb)
-[![nbviewer](https://img.shields.io/badge/view%20in-nbviewer-orange)](https://nbviewer.org/github/cdc15000/mar-eval/blob/main/notebooks/annex_gg_full_demo.ipynb)
 
 ---
 
