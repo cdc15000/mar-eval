@@ -12,11 +12,15 @@ def extract_roi(image: np.ndarray, center: Tuple[int, int], size: Tuple[int, int
     roi[0:(y1-y0), 0:(x1-x0)] = image[y0:y1, x0:x1]
     return roi
 
-def batch_extract_rois(images: List[np.ndarray], centers: List[Tuple[int,int]], size: Tuple[int,int]):
-    """Extract all ROIs for a list of images; returns ROIs flattened to (n, q)."""
-    rois = []
-    for img in images:
-        for c in centers:
-            r = extract_roi(img, c, size)
-            rois.append(r.ravel())
-    return np.asarray(rois)
+def batch_extract_rois(images, centers, size):
+    """Extract ROIs from either dict or list of images."""
+    rois = {}
+    if isinstance(images, dict):
+        for key, img in images.items():
+            for ci, c in enumerate(centers):
+                rois[(key, ci)] = extract_roi(img, c, size)
+    else:
+        for i, img in enumerate(images):
+            for ci, c in enumerate(centers):
+                rois[(i, ci)] = extract_roi(img, c, size)
+    return rois

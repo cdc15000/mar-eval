@@ -9,19 +9,21 @@
 
 ## What is this?
 
-`mar-eval` is an open-source Python toolkit that implements the analysis framework described in **Annex GG** of the proposed IEC 60601-2-44 Ed. 4. It enables objective evaluation of **Metal Artifact Reduction (MAR)** in CT imaging using the **Channelized Hotelling Observer (CHO)**, **AUC-based detectability metrics**, and **bias assessment** between MAR and Filtered-Back Projection (FBP) reconstructions.
+`mar-eval` is an open-source Python toolkit that implements the analysis framework described in **Annex GG** of the proposed IEC 60601-2-44 Ed. 4.  
+It enables objective evaluation of **Metal Artifact Reduction (MAR)** in CT imaging using the **Channelized Hotelling Observer (CHO)**, **AUC-based detectability metrics**, and **bias assessment** between MAR and Filtered-Back Projection (FBP) reconstructions.
 
-> The toolkit focuses on the **type test** use case, i.e., premarket evaluation on representative systems and validated phantoms or realistic simulation outputs.
+> The toolkit supports the **type test** use case — premarket evaluation on representative CT systems or realistic simulation outputs.
 
 ---
 
 ## Example Notebook
 
-A full demo notebook is available at:
+A full Annex GG demo is provided at:
 
-notebooks/annex_gg_full_demo.ipynb
+**`notebooks/annex_gg_full_demo.ipynb`**
 
-This notebook reproduces the workflow described in Annex GG, from ROI extraction to AUC computation and bias evaluation.
+This notebook runs the entire workflow end-to-end: from synthetic image generation and ROI extraction to CHO analysis, AUC computation, paired t-tests, and bias evaluation.  
+It uses **detectability curves (AUC vs. Dose, AUC vs. Contrast)** rather than heatmaps, matching *Vaishnav et al., Med. Phys.* 2020.
 
 ---
 
@@ -29,18 +31,18 @@ This notebook reproduces the workflow described in Annex GG, from ROI extraction
 
 ```bash
 pip install mar-eval
-# for notebook demo & plots you may also want:
+# for notebook demo & plots:
 pip install matplotlib jupyterlab pyyaml
 ```
 
-Python ≥ 3.9 is supported.
+Python ≥ 3.9 is supported.  
+GitHub Actions tests run on 3.9 – 3.12.
 
 ---
 
-## Quick start (synthetic)
+## Quick Start (synthetic)
 
 ```python
-import numpy as np
 from mareval import (
     generate_synthetic_study, extract_roi, batch_extract_rois,
     build_pca_channels, cho_template, cho_decision_values,
@@ -53,16 +55,12 @@ images = study["images"]
 centers = [(32, 24)]
 roi_size = (17,17)
 
-# simple training set for channels
 train_imgs = [images[(0,0,0,'FBP','absent')], images[(2,2,0,'MAR','present')]]
 train_rois = batch_extract_rois(train_imgs, centers, roi_size)
 U = build_pca_channels(train_rois, n_channels=8)
 
-# one cell AUC (FBP)
-pos = []; neg = []
-for r in range(cfg['realizations']):
-    pos.append(extract_roi(images[(0,0,r,'FBP','present')], centers[0], roi_size).ravel())
-    neg.append(extract_roi(images[(0,0,r,'FBP','absent')], centers[0], roi_size).ravel())
+pos = [extract_roi(images[(0,0,r,'FBP','present')], centers[0], roi_size).ravel() for r in range(cfg['realizations'])]
+neg = [extract_roi(images[(0,0,r,'FBP','absent')], centers[0], roi_size).ravel() for r in range(cfg['realizations'])]
 
 import numpy as np
 pos = np.asarray(pos); neg = np.asarray(neg)
@@ -73,27 +71,27 @@ w = cho_template(ch_pos, ch_neg, lambda_reg=1e-3)
 s = np.concatenate([ch_pos @ w, ch_neg @ w])
 y = np.array([1]*len(ch_pos) + [0]*len(ch_neg))
 res = compute_auc_ci(s, y, n_bootstrap=1000)
-print(res)  # {'auc': ..., 'ci': (..., ...), 'n_bootstrap': 1000}
+print(res)
 ```
 
 ---
 
 ## Annex GG “adult chest / spinal rod” example
 
-- Config: `configs/adult_chest_spinal_rod.yaml`
+- Config: `configs/adult_chest_spinal_rod.yaml`  
 - Notebook: `notebooks/annex_gg_full_demo.ipynb`
 
 The notebook executes the full flow:
 
-1. **Load config** and generate synthetic images approximating an adult chest with a **6 mm titanium rod** and a **5 mm lesion** adjacent to the rod centerline.
-2. **Preview** grid counts and an example slice.
-3. **ROI extraction** and **channel learning** (PCA).
-4. **CHO template** + **AUC per (dose, contrast)** for both **FBP** and **MAR**.
-5. **Paired one‑tailed t‑test** and **ΔAUC bias assessment**.
-6. **Heatmaps** for AUC and ΔAUC.
-7. **CSV tables** (Annex‑GG‑style) in `outputs/`.
+1. **Load config** and generate synthetic images approximating an adult chest with a **titanium spinal rod** and an adjacent low-contrast lesion.  
+2. **Preview** example slices and ROI placement.  
+3. **ROI extraction** and **channel learning** (PCA).  
+4. **CHO template** and **AUC computation** for each `(dose, contrast)` cell, both FBP and MAR.  
+5. **Paired one-tailed t-test** and **ΔAUC bias assessment**.  
+6. **Detectability curves** for AUC vs Dose and AUC vs Contrast.  
+7. **CSV output tables** in `outputs/`.
 
-> The synthetic generator produces realistic streak‑like artifacts and dose‑dependent noise; MAR reduces streak amplitude and introduces mild smoothing.
+> The synthetic generator produces realistic streak-like artifacts and dose-dependent noise; MAR reduces streak amplitude and adds mild smoothing.
 
 ---
 
@@ -113,27 +111,16 @@ from mareval import (
   - `cho_template(ch_pos, ch_neg, lambda_reg=1e-3)`
   - `cho_decision_values(ch_samples, w)`
 - **AUC & Stats**
-  - `compute_auc(values, labels) -> float`
-  - `compute_auc_ci(values, labels, n_bootstrap=2000) -> dict`
-  - `paired_ttest_one_tailed(a, b) -> (delta_mean, p_one)`
-  - `delta_auc_bias_assessment(auc_fb, auc_mar) -> dict`
+  - `compute_auc(values, labels)`  
+  - `compute_auc_ci(values, labels, n_bootstrap=2000)`  
+  - `paired_ttest_one_tailed(a, b)`  
+  - `delta_auc_bias_assessment(auc_fb, auc_mar)`
 - **Simulator flow**
   - `generate_synthetic_study(cfg_dict)`
   - `extract_roi(img, center, size)` / `batch_extract_rois([...], centers, size)`
   - `make_parameter_grid(...)`
   - `save_auc_table_csv(...)`, `save_delta_auc_table_csv(...)`
 
----
-
-## Tests / CI
-
-A light **smoke test** covers the end‑to‑end pipeline on a tiny synthetic set:
-
-```
-pytest -q
-```
-
-GitHub Actions runs the tests across 3.9–3.12.
 ---
 
 ## Citation
@@ -146,8 +133,8 @@ If you use `mar-eval` in your research, please cite:
 
 ## Versioning
 
-- This update introduces **v0.3.0** with simulator workflow, unified Annex‑GG notebook, and reporting/visualization helpers.
-- Version tags are used to align releases with document snapshots (e.g., Annex‑GG draft refs).
+- **v0.3.0** introduces the simulator workflow, unified Annex GG notebook, and detectability-curve outputs.  
+- Version tags align releases with document snapshots (e.g., Annex GG draft refs).
 
 ---
 

@@ -33,10 +33,10 @@ from .reporting import (
     save_auc_table_csv,
     save_delta_auc_table_csv,
 )
-from .viz import (
-    plot_auc_heatmap,
-    plot_delta_auc_heatmap,
-)
+
+# from .viz import plot_auc_heatmap, plot_delta_auc_heatmap
+# (Removed since we now use detectability curves, not heatmaps)
+
 
 __all__ = [
     # cho
@@ -48,5 +48,4 @@ __all__ = [
     "make_parameter_grid", "grid_to_index",
     # reporting / viz
     "save_auc_table_csv", "save_delta_auc_table_csv",
-    "plot_auc_heatmap", "plot_delta_auc_heatmap",
 ]

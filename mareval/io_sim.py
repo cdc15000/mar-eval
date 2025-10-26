@@ -18,6 +18,9 @@ class SynthConfig:
     contrast_min: float = 1.00
     contrast_max: float = 1.06
     rng_seed: int = 7
+    roi_size: Tuple[int, int] = (25, 25)
+    channels: int = 16
+    lambda_reg: float = 1e-3
 
 def _draw_lesion(img: np.ndarray, center: Tuple[int, int], radius: int, delta: float):
     cx, cy = center

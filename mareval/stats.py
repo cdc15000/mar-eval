@@ -47,7 +47,10 @@ def paired_ttest_one_tailed(values_a, values_b):
     return float(diffs.mean()), float(p_one)
 
 def delta_auc_bias_assessment(auc_fb, auc_mar):
-    """Compute ΔAUC and label bias status based on sign."""
-    delta = float(auc_mar - auc_fb)
+    """Compute ΔAUC and label bias status for scalar or array inputs."""
+    auc_fb = np.asarray(auc_fb)
+    auc_mar = np.asarray(auc_mar)
+    delta = np.mean(auc_mar - auc_fb)
     status = "improved" if delta > 0 else ("worse" if delta < 0 else "no_change")
-    return {"delta_auc": delta, "status": status}
+    return {"delta_auc": float(delta), "status": status}
+

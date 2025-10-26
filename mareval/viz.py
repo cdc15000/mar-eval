@@ -6,22 +6,13 @@ def _prep_axes():
     ax = fig.add_subplot(111)
     return fig, ax
 
-def plot_auc_heatmap(auc_grid: np.ndarray, dose_levels, contrast_levels, title: str = "AUC Heatmap"):
-    fig, ax = _prep_axes()
-    im = ax.imshow(auc_grid, aspect="auto")
+def plot_auc_heatmap(auc, dose_levels=None, contrast_levels=None, title="AUC Heatmap"):
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(6, 4))
+    im = ax.imshow(auc, origin='lower', cmap='viridis', vmin=0.5, vmax=1.0)
+    ax.set_xlabel('Contrast level')
+    ax.set_ylabel('Dose level')
     ax.set_title(title)
-    ax.set_xlabel("contrast index (low→high)")
-    ax.set_ylabel("dose index (low→high)")
-    ax.set_yticks(range(len(dose_levels)))
-    ax.set_xticks(range(len(contrast_levels)))
-    return fig, ax
+    plt.colorbar(im, ax=ax, label='AUC')
+    plt.show()
 
-def plot_delta_auc_heatmap(delta_grid: np.ndarray, dose_levels, contrast_levels, title: str = "ΔAUC Heatmap"):
-    fig, ax = _prep_axes()
-    im = ax.imshow(delta_grid, aspect="auto")
-    ax.set_title(title)
-    ax.set_xlabel("contrast index (low→high)")
-    ax.set_ylabel("dose index (low→high)")
-    ax.set_yticks(range(len(dose_levels)))
-    ax.set_xticks(range(len(contrast_levels)))
-    return fig, ax
